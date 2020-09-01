@@ -42,18 +42,33 @@ namespace Pongv2
     class Ball
     {
         private Vector pos;
+        private Vector vel;
+
         private double speed = 100;
 
-        Timer timer;
+        public Timer timer;
         
         public Ball(int x, int y)
         {
             pos.x = x;
             pos.y = y;
 
+
+
+            timer = new Timer(speed);
             timer.Enabled = true;
+            timer.Elapsed += OnTimedEvent;
         }
 
-        
+        private void GetRandomVel()
+        {
+
+        }
+
+        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
+        {
+            
+        }
+
     }
 }
