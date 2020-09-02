@@ -14,7 +14,18 @@ namespace Pongv2
         {
             this.x = x;
             this.y = y;
-        }      
+        }
+        
+        public void Add(Vector vector)
+        {
+            x += vector.x;
+            y += vector.y;
+        }
+    }
+
+    class Map
+    {
+        public byte[][] map;
     }
 
     class Program
