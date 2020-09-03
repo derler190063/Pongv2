@@ -9,58 +9,88 @@ namespace Pongv2
 {
     class Game
     {
-        private Vector size = new Vector(41, 11);
+        private Vector size = new Vector(41, 21);
         private UInt32 rounds = 5;
 
-        private Map _map = new Map();
+        private Map map;
         private Ball ball;
+
+        public Game()
+        {
+            map = new Map(size.y, size.x);
+            ball = new Ball(size.x / 2, size.y / 2, map);
+
+            BuildMap();
+        }
 
         private void BuildMap()
         {
-            for(int y = 0; y < size.y; y++)
-            {
-                _map.map[y] = new byte[size.x];
-                for(int x = 0; x < size.x; x++)
-                {
-                    _map.map[y][x] = 0;
-                }
-            }
 
             for(int y = 0; y < size.y; y++)
             {
-                _map.map[y][size.x / 2] = 1;
-            }
-
-            for(int y = 0; y < size.y; y++)
-            {
-                _map.map[y][0] = 2;
-                _map.map[y][size.x - 1] = 2;
+                map[0, y] = 2;
+                map[size.x - 1, y] = 2;
             }
 
             for (int x = 0; x < size.y; x++)
             {
-                _map.map[0][x] = 2;
-                _map.map[size.y - 1][x] = 2;
+                map[x, size.y - 1] = 2;
             }
         }
 
         public void Start()
         {
-            BuildMap();
-            ball = new Ball(size.x / 2, size.y / 2, _map);
+            Console.CursorVisible = false;
+            Console.SetCursorPosition(0, 0);
+            Console.SetWindowSize(size.x, size.y);
+            Console.SetBufferSize(size.x, size.y);
+
+            DrawMap();
+            while(true)
+                Update();
+        }
+
+        private void Update()
+        {
+
+        }
+
+        private void DrawMap()
+        {
+            string n = "";
+
+            for(int y = 0; y < size.y; y++)
+            {
+                for(int x = 0; x < size.x; x++)
+                {
+                    switch (map[x, y])
+                    {
+                        case 1:
+                            n += '|';
+                            break;
+                        case 3:
+                            n += 'o';
+                            break;
+                        default:
+                            n += ' ';
+                            break;
+                    }
+                }
+            }
+
+            Console.WriteLine(n);
         }
     }
 
     class Ball
     {
-        private Map _map;
+        private Map map;
 
         private Vector pos;
 
         private Vector dir;
         private Vector vel;
         private Vector moves;
-
         
         private double rate = 100;
 
@@ -68,7 +98,7 @@ namespace Pongv2
         
         public Ball(int x, int y, Map map)
         {
-            _map = map;
+            this.map = map;
 
             pos.x = x;
             pos.y = y;
@@ -131,23 +161,26 @@ namespace Pongv2
             {
                 moves = vel;
             }
+
+            map[pos.x, pos.y] = 3;
         }
 
         public void Start()
         {
+            GetRandomDir();
             GetRandomMoves();
             timer.Start();
         }
 
         private void CheckCollision()
         {
-            if(_map.map[pos.y][pos.x + 1] == 2 && _map.map[pos.y][pos.x - 1] == 2)
+            if (map[pos.x, pos.y] == 2 && map[pos.x, pos.y] == 2)
             {
                 dir.x *= -1;
                 GetRandomMoves();
             }
 
-            if (_map.map[pos.y + 1][pos.x] == 3 && _map.map[pos.y - 1][pos.x] == 3)
+            if (map[pos.x, pos.y] == 3 && map[pos.x, pos.y] == 3)
             {
                 dir.y *= -1;
                 GetRandomMoves();
@@ -161,5 +194,51 @@ namespace Pongv2
             timer.Start();
         }
 
+    }
+
+    class Player
+    {
+        private Map map;
+        private Vector pos;
+        private SByte dir;
+
+        private Timer nextMove;
+
+        public Player(int x, int y,Map map) 
+        {
+            this.map = map;
+
+            pos.x = x;
+            pos.y = y;
+
+            nextMove.Enabled = true;
+            nextMove.AutoReset = true;
+            nextMove.Elapsed += Move;          
+        }
+        
+        private SByte Input()
+        {
+            if (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if(key.KeyChar == 'w')
+                {
+                    return 1;
+                }
+
+                if (key.KeyChar == 's')
+                {
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        private void Move(object source, ElapsedEventArgs e)
+        {
+                
+        }
     }
 }

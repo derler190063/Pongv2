@@ -25,7 +25,26 @@ namespace Pongv2
 
     class Map
     {
-        public byte[][] map;
+        private byte[][] map;
+        public Map(int y, int x)
+        {
+            map = new byte[y][];
+
+            for(int i = 0; i < y; i++)
+            {
+                map[i] = new byte[x];
+                for(int j = 0; j < x; j++)
+                {
+                    map[i][j] = 0;
+                }
+            }
+        }
+
+        public byte this[int x ,int y]
+        {
+            get { return map[y][x]; }
+            set { map[y][x] = value; }
+        }
     }
 
     class Program
@@ -33,8 +52,11 @@ namespace Pongv2
         static void Main(string[] args)
         {
             Console.WriteLine("Willkommen zu Pong BattleRoyale\n");
+            Game game = new Game();
+            game.Start();
 
-
+            while (true) ;
+            
         }
     }
 }
