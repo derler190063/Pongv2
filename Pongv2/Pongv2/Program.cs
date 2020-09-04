@@ -56,6 +56,7 @@ namespace Pongv2
             game.Start();
 
             while (true) ;
+                
             
         }
     }

@@ -9,16 +9,21 @@ namespace Pongv2
 {
     class Game
     {
-        private Vector size = new Vector(41, 21);
+        private Vector size = new Vector(41, 11);
         private UInt32 rounds = 5;
 
         private Map map;
         private Ball ball;
 
+        private Player player1;
+        private Player player2;
+
         public Game()
         {
             map = new Map(size.y, size.x);
-            ball = new Ball(size.x / 2, size.y / 2, map);
+            ball = new Ball(size.x / 2, size.y / 2, map, this);
+
+            player1 = new Player(2, size.y / 2, map, this);
 
             BuildMap();
         }
@@ -52,10 +57,10 @@ namespace Pongv2
 
         private void Update()
         {
-
+ 
         }
 
-        private void DrawMap()
+        public void DrawMap()
         {
             string n = "";
 
@@ -71,6 +76,9 @@ namespace Pongv2
                         case 3:
                             n += 'o';
                             break;
+                        case 4:
+                            n += 'I';
+                            break;
                         default:
                             n += ' ';
                             break;
@@ -85,6 +93,7 @@ namespace Pongv2
     class Ball
     {
         private Map map;
+        private Game game;
 
         private Vector pos;
 
@@ -96,9 +105,10 @@ namespace Pongv2
 
         private Timer timer;
         
-        public Ball(int x, int y, Map map)
+        public Ball(int x, int y, Map map, Game game)
         {
             this.map = map;
+            this.game = game;
 
             pos.x = x;
             pos.y = y;
@@ -163,6 +173,7 @@ namespace Pongv2
             }
 
             map[pos.x, pos.y] = 3;
+            game.DrawMap();
         }
 
         public void Start()
@@ -199,17 +210,24 @@ namespace Pongv2
     class Player
     {
         private Map map;
+        private Game game;
+
         private Vector pos;
         private SByte dir;
 
+        private double maxSpeed = 100;
+
         private Timer nextMove;
 
-        public Player(int x, int y,Map map) 
+        public Player(int x, int y, Map map, Game game) 
         {
             this.map = map;
+            this.game = game;
 
             pos.x = x;
             pos.y = y;
+
+            nextMove = new Timer(maxSpeed);
 
             nextMove.Enabled = true;
             nextMove.AutoReset = true;
@@ -238,7 +256,21 @@ namespace Pongv2
 
         private void Move(object source, ElapsedEventArgs e)
         {
-            //asd
+            if (map[pos.x, pos.y - 1] != 2 && dir == 1)
+            {
+                map[pos.x, pos.y] = 0;
+                pos.y--;
+                map[pos.x, pos.y] = 4;
+            }
+
+            if (map[pos.x, pos.y + 1] != 2 && dir == -1)
+            {
+                map[pos.x, pos.y] = 0;
+                pos.y++;
+                map[pos.x, pos.y] = 4;
+            }
+
+            game.DrawMap();
         }
     }
 }
