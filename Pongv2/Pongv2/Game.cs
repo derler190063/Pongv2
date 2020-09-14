@@ -21,23 +21,17 @@ namespace Pongv2
         public Game()
         {
             map = new Map(size.y, size.x);
-            ball = new Ball(size.x / 2, size.y / 2, map, this);
+            ball = new Ball(size.x / 2, size.y / 2 + 1, map, false);
 
-            player1 = new Player(2, size.y / 2, map, this);
+            player1 = new Player(2, size.y / 2 + 1, map);
+            player2 = new Player(size.x - 3, size.y / 2 + 1, map);
 
             BuildMap();
         }
 
         private void BuildMap()
         {
-
-            for(int y = 0; y < size.y; y++)
-            {
-                map[0, y] = 2;
-                map[size.x - 1, y] = 2;
-            }
-
-            for (int x = 0; x < size.y; x++)
+            for (int x = 0; x < size.x; x++)
             {
                 map[x, size.y - 1] = 2;
             }
@@ -50,50 +44,34 @@ namespace Pongv2
             Console.SetWindowSize(size.x, size.y);
             Console.SetBufferSize(size.x, size.y);
 
-            DrawMap();
+            FrameDrawer.DrawFrame(map);
+            ball.Start();
             while(true)
                 Update();
         }
 
         private void Update()
         {
- 
+            player1.Update();
+            player2.Update();
+
+            CheckWindowSize();
         }
 
-        public void DrawMap()
+        private void CheckWindowSize()
         {
-            string n = "";
-
-            for(int y = 0; y < size.y; y++)
+            if(Console.WindowWidth != size.x && Console.WindowHeight != size.y)
             {
-                for(int x = 0; x < size.x; x++)
-                {
-                    switch (map[x, y])
-                    {
-                        case 1:
-                            n += '|';
-                            break;
-                        case 3:
-                            n += 'o';
-                            break;
-                        case 4:
-                            n += 'I';
-                            break;
-                        default:
-                            n += ' ';
-                            break;
-                    }
-                }
+                Console.SetWindowSize(size.x, size.y);
+                Console.SetBufferSize(size.x, size.y);
             }
-
-            Console.WriteLine(n);
         }
+      
     }
 
     class Ball
     {
         private Map map;
-        private Game game;
 
         private Vector pos;
 
@@ -101,17 +79,21 @@ namespace Pongv2
         private Vector vel;
         private Vector moves;
         
-        private double rate = 100;
+        private double rate = 400;
 
         private Timer timer;
+
+        private bool advMove;
         
-        public Ball(int x, int y, Map map, Game game)
+        public Ball(int x, int y, Map map, bool advMove)
         {
             this.map = map;
-            this.game = game;
 
             pos.x = x;
             pos.y = y;
+
+            map[pos.x, pos.y] = 3;
+            this.advMove = advMove;
 
             timer = new Timer(rate);
             timer.Enabled = true;
@@ -136,65 +118,72 @@ namespace Pongv2
             Random rnd = new Random();
 
             if (rnd.Next(2) == 0)
-            {
                 dir.x = -1;
-            }
             else
-            {
                 dir.x = 1;
-            }
+            
 
             if (rnd.Next(2) == 0)
-            {
                 dir.y = -1;
-            }
             else
-            {
                 dir.y = 1;
-            }
+            
         }
 
         private void Move()
         {
-            if(moves.x > 0)
+            map[pos.x, pos.y] = 0;
+            CheckCollision();
+
+            if (advMove)
             {
-                moves.x--;
-                pos.x += dir.x;
+                if (moves.x > 0)
+                {
+                    moves.x--;
+                    pos.x += dir.x;
+                }
+                else if (moves.y > 0)
+                {
+                    moves.y--;
+                    pos.y += dir.y;
+                }
+
+                if (moves.y == 0)
+                {
+                    moves = vel;
+                }
             }
-            else if(moves.y > 0)
+            else
             {
-                moves.y--;
-                pos.y += dir.y;
-            }
-            
-            if(moves.y == 0)
-            {
-                moves = vel;
+                pos.Add(dir);
             }
 
             map[pos.x, pos.y] = 3;
-            game.DrawMap();
+            FrameDrawer.DrawFrame(map);
         }
 
         public void Start()
         {
             GetRandomDir();
-            GetRandomMoves();
+            if(advMove)
+                GetRandomMoves();
             timer.Start();
         }
 
         private void CheckCollision()
         {
-            if (map[pos.x, pos.y] == 2 && map[pos.x, pos.y] == 2)
+            if (pos.x == 0 || pos.x == map.size.x - 1)
             {
                 dir.x *= -1;
-                GetRandomMoves();
+                if(advMove)
+                    GetRandomMoves();
             }
 
-            if (map[pos.x, pos.y] == 3 && map[pos.x, pos.y] == 3)
+            if (map[pos.x, pos.y - 1] == 2 && map[pos.x, pos.y + 1] == 2)
             {
                 dir.y *= -1;
-                GetRandomMoves();
+                if(advMove)
+                    GetRandomMoves();
             }
         }
 
@@ -210,22 +199,22 @@ namespace Pongv2
     class Player
     {
         private Map map;
-        private Game game;
 
         private Vector pos;
-        private SByte dir;
+        private int dir;
 
         private double maxSpeed = 100;
 
         private Timer nextMove;
 
-        public Player(int x, int y, Map map, Game game) 
+        public Player(int x, int y, Map map) 
         {
             this.map = map;
-            this.game = game;
 
             pos.x = x;
             pos.y = y;
+
+            map[pos.x, pos.y] = 4;
 
             nextMove = new Timer(maxSpeed);
 
@@ -234,10 +223,12 @@ namespace Pongv2
             nextMove.Elapsed += Move;          
         }
         
-        private SByte Input()
+        private int Input()
         {
+            Console.Beep(20000,1);
             if (Console.KeyAvailable)
             {
+                Console.Beep(2000, 1);
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 if(key.KeyChar == 'w')
@@ -254,23 +245,57 @@ namespace Pongv2
             return 0;
         }
 
+        public void Update()
+        {
+            dir = Input();
+        }
+
         private void Move(object source, ElapsedEventArgs e)
         {
-            if (map[pos.x, pos.y - 1] != 2 && dir == 1)
+            if (pos.y != 0 && dir == 1)
             {
                 map[pos.x, pos.y] = 0;
                 pos.y--;
                 map[pos.x, pos.y] = 4;
             }
 
-            if (map[pos.x, pos.y + 1] != 2 && dir == -1)
+            if (pos.y != map.size.y - 1 && dir == -1)
             {
                 map[pos.x, pos.y] = 0;
                 pos.y++;
                 map[pos.x, pos.y] = 4;
             }
 
-            game.DrawMap();
+            FrameDrawer.DrawFrame(map);
         }
     }
+
+    static class FrameDrawer
+    {
+        public static void DrawFrame(Map map)
+        {
+            Console.SetCursorPosition(0, 0);
+
+            string n = "";
+
+            for (int y = 0; y < map.size.y; y++)
+            {
+                for (int x = 0; x < map.size.x; x++)
+                {
+                    switch (map[x, y])
+                    {
+                        case 1: n += '|'; break;
+                        case 2: n += '_'; break;
+                        case 3: n += 'o'; break;
+                        case 4: n += 'I'; break;
+
+                        default: n += ' '; break;
+                    }
+                }
+            }
+
+            Console.Write(n);
+        }
+    }
+
 }
