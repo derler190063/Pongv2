@@ -25,13 +25,34 @@ namespace Pong21
 
     class Ball
     {
+        private Map map;
+
         private Vector pos;
         private Vector vel;
 
-        public Ball(Vector pos)
+        private double rate = 120;
+        private Timer timer;
+
+        public Ball(Vector pos, Map map)
         {
+            this.map = map;
             this.pos = pos;
+
+            timer = new Timer(rate);
+            timer.Enabled = true;
+            timer.Elapsed += Move;
+
             vel = GetRandomVel();
+        }
+
+        private void Move(Object o, ElapsedEventArgs e)
+        {
+            bool isValidMove = false;
+
+
+
+            if(isValidMove)
+                pos.Add(vel);
         }
 
         private Vector GetRandomVel()
