@@ -21,6 +21,7 @@ namespace Pong21
             x = vector.x;
             y = vector.y;
         }
+
     }
 
     class Map
@@ -37,7 +38,7 @@ namespace Pong21
                 map[i] = new int[x];
                 for (int j = 0; j < x; j++)
                 {
-                    map[i][j] = 0;
+                    map[i][j] = -1;
                 }
             }
             size.x = x;
@@ -53,7 +54,7 @@ namespace Pong21
                 map[i] = new int[size.x];
                 for (int j = 0; j < size.x; j++)
                 {
-                    map[i][j] = 0;
+                    map[i][j] = -1;
                 }
             }
             this.size.x = size.x;
@@ -65,13 +66,20 @@ namespace Pong21
             get { return map[y][x]; }
             set { map[y][x] = value; }
         }
+
+        public int this[Vector pos]
+        {
+            get { return map[pos.y][pos.x]; }
+            set { map[pos.y][pos.x] = value; }
+        }
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-            
+            Game game = new Game();
+            game.Setup();
         }
     }
 }

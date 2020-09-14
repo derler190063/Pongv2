@@ -12,14 +12,23 @@ namespace Pong21
         private Vector size = new Vector(21, 9);
         private Map map;
 
-        private void Setup()
+        private Ball ball;
+
+
+        public void Setup()
         {
             map = new Map(size);
+            ball = new Ball(map);
 
             Console.CursorVisible = false;
 
             Console.SetWindowSize(size.x, size.y);
             Console.SetBufferSize(size.x, size.y);
+
+            ball.Start();
+            FrameDrawer.DrawFrame(map);
+
+            while (true) ;
         }
     }
 
@@ -30,29 +39,45 @@ namespace Pong21
         private Vector pos;
         private Vector vel;
 
-        private double rate = 120;
+        private double rate = 100;
         private Timer timer;
 
-        public Ball(Vector pos, Map map)
+        public Ball(Map map)
         {
             this.map = map;
-            this.pos = pos;
 
-            timer = new Timer(rate);
-            timer.Enabled = true;
-            timer.Elapsed += Move;
+            pos.x = map.size.x / 2;
+            pos.y = map.size.y / 2;
 
             vel = GetRandomVel();
+
+            map[pos] = 2;
+        }
+
+        public void Start()
+        {
+            SetTimer();
         }
 
         private void Move(Object o, ElapsedEventArgs e)
         {
-            bool isValidMove = false;
+            if(pos.x + 1 == map.size.x - 1 || pos.x - 1 == 0)
+            {
+                vel.x *= -1;
+            }
 
+            if (pos.y + 1 == map.size.y - 1 || pos.y - 1 == 0)
+            {
+                vel.y *= -1;
+            }
 
+            map[pos] = -1;
 
-            if(isValidMove)
-                pos.Add(vel);
+            pos.Add(vel);
+            map[pos] = 2;
+
+            FrameDrawer.DrawFrame(map);
+            SetTimer();
         }
 
         private Vector GetRandomVel()
@@ -72,6 +97,15 @@ namespace Pong21
 
             return v;
         }
+
+        private void SetTimer()
+        {
+            timer = new Timer(rate);
+            timer.Enabled = true;
+            timer.Elapsed += Move;
+
+            timer.Start();
+        }
     }
 
     static class FrameDrawer
@@ -79,7 +113,7 @@ namespace Pong21
         public static void DrawFrame(Map map)
         {
             Console.SetCursorPosition(0, 0);
-
+            Console.Beep(1000, 500);
             string n = "";
             
             for(int y = 0; y < map.size.y; y++)
