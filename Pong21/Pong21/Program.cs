@@ -18,8 +18,8 @@ namespace Pong21
 
         public void Add(Vector vector)
         {
-            x = vector.x;
-            y = vector.y;
+            x += vector.x;
+            y += vector.y;
         }
 
     }
@@ -65,6 +65,12 @@ namespace Pong21
         {
             get { return map[y][x]; }
             set { map[y][x] = value; }
+        }
+
+        public void DrawSize()
+        {
+            Console.WriteLine(map.Length);
+            Console.WriteLine(map[0].Length);
         }
 
         public int this[Vector pos]
