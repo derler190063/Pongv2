@@ -18,7 +18,7 @@ namespace Pong21
         private Player player2;
 
         private DateTime nextFrame;
-        private const double invFramrate = 1;
+        private const double FRAMERATE = 10;
 
         public void Setup()
         {
@@ -31,7 +31,7 @@ namespace Pong21
             Console.CursorVisible = false;
             Console.SetWindowSize(size.x, size.y);
 
-            nextFrame = DateTime.Now.AddMilliseconds(invFramrate);
+            nextFrame = DateTime.Now.AddMilliseconds(FRAMERATE);
             while (true)
             {
                 Update();  
@@ -43,7 +43,7 @@ namespace Pong21
             ball.Update();
 
             player1.Update();
-            player2.Update();
+            //player2.Update();
 
             CheckFrame();
         }
@@ -52,7 +52,7 @@ namespace Pong21
         {
             if (nextFrame - DateTime.Now <= TimeSpan.Zero)
             {
-                nextFrame = DateTime.Now.AddMilliseconds(invFramrate);
+                nextFrame = DateTime.Now.AddMilliseconds(FRAMERATE);
                 FrameDrawer.DrawFrame(map);
             }
                 
@@ -75,7 +75,7 @@ namespace Pong21
         private Vector pos;
         private Vector vel;
 
-        private double rate = 100;
+        private double rate = 150;
 
         private DateTime nextMove;
 
@@ -139,6 +139,7 @@ namespace Pong21
 
             pos.Add(vel);
             map[pos] = 2;
+
         }
 
         private Vector GetRandomVel()

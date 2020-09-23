@@ -86,6 +86,8 @@ namespace Pong21
         {
             Game game = new Game();
             game.Setup();
+
+            Server server = new Server(game);
         }
     }
 }
